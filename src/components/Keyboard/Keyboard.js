@@ -5,6 +5,7 @@ import { checkGuess } from "../../game-helpers";
 
 function Keyboard({ words, answer }) {
 	const [guesses, setGuesses] = useState([]);
+	const [keyStates, setKeyStates] = useState({});
 
 	useEffect(() => {
 		const handleKeyPress = (event) => {
@@ -28,10 +29,26 @@ function Keyboard({ words, answer }) {
 		// Retrieve only completed guesses from the words array
 		const completedGuesses = words.filter((word) => word !== "     ");
 		setGuesses(completedGuesses);
-		console.log(completedGuesses, "completedGuesses");
-		console.log(guesses, "guesses");
-		console.log(words, "words");
 	}, [words]);
+
+	useEffect(() => {
+		// Create a variable to store the new key states
+		const newKeyStatuses = {};
+
+		guesses.forEach((guess) => {
+			// Get the result of checkGuess for the current guess
+			const result = checkGuess(guess, answer);
+
+			result.forEach(({ letter, status }) => {
+				// Update the state ONLY if it's not already "correct"
+				if (!newKeyStatuses[letter] || newKeyStatuses[letter] !== "correct") {
+					newKeyStatuses[letter] = status;
+				}
+			});
+		});
+
+		setKeyStates(newKeyStatuses);
+	}, [guesses, answer]);
 
 	return (
 		<div className="keyboard">
@@ -39,11 +56,9 @@ function Keyboard({ words, answer }) {
 				return (
 					<span key={i}>
 						{row.split("").map((key) => {
-							const className = checkGuess(guesses[0], answer);
-							const { status } = className ? className : { status: "" };
-
+							const state = keyStates[key] || "";
 							return (
-								<span key={key} className={status}>
+								<span key={key} className={state ? state : undefined}>
 									{key}
 								</span>
 							);

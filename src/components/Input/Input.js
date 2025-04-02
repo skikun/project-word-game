@@ -38,9 +38,6 @@ function Input({ onSubmitGuess, blocked }) {
 			setGuess("");
 		}
 
-		// Log the guess to the console
-		console.log({ guess: guess });
-
 		onSubmitGuess(guess);
 	}
 
